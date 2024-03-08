@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34601.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PromptGPT", "PromptGPT\PromptGPT.csproj", "{2564BDCB-F77D-4A5D-B64F-F9291BE4F4BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromptGPT.Client", "PromptGPT.Client\PromptGPT.Client.csproj", "{2564BDCB-F77D-4A5D-B64F-F9291BE4F4BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
