@@ -11,7 +11,7 @@ namespace PromptGPT.Services
     {
         public ModelDeployment GetDefaultModelDeployment()
         {
-            return new ModelDeployment("default");
+            return new ModelDeployment("gpt4");
         }
     }
 }

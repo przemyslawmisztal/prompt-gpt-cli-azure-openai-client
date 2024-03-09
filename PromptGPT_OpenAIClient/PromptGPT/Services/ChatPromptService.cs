@@ -13,7 +13,7 @@ namespace PromptGPT.Services
         {
             return new ChatPrompt()
             {
-                Prompt = "You are an assistant to a Head of Microsoft Technology Practice"
+                Prompt = "You are an assistant to the Regional Manager"
             };
         }
     }

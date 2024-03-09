@@ -13,15 +13,18 @@ namespace PromptGPT.Services
         private readonly AzureOpenAIClient _client;
         private readonly ChatPromptService _chatPromptService;
         private readonly ModelDeploymentService _modelDeploymentService;
+        private readonly AppSettings _appSettings;
         private Chat _chat = null!;
 
         public AzureOpenAIService(AzureOpenAIClient client,
             ChatPromptService chatPromptService,
-            ModelDeploymentService modelDeploymentService)
+            ModelDeploymentService modelDeploymentService,
+            AppSettings appSettings)
         {
             this._client = client;
             this._chatPromptService = chatPromptService;
             this._modelDeploymentService = modelDeploymentService;
+            this._appSettings = appSettings;
         }
 
         public void StartNewChat()
@@ -34,10 +37,13 @@ namespace PromptGPT.Services
             };
         }
 
-        public void SendMessage(string message)
+        public string SendMessage(string message)
         {
             if (message.Length == 0)
                 throw new ArgumentException(message, nameof(message));
+
+            if (_chat == null)
+                StartNewChat();
 
             var request = new PostChatMessageRequest
             {
@@ -56,6 +62,8 @@ namespace PromptGPT.Services
             request.CurrentChatMessage = new ChatMessageDto() { Message = message, ChatMessageRole = ChatMessageRole.User };
 
             var response = _client.PostAsync(request);
+
+            return response.Result.Message;
         }
     }
 }

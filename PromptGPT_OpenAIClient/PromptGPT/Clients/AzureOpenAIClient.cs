@@ -13,25 +13,19 @@ namespace PromptGPT.Clients
     public class AzureOpenAIClient
     {
         private readonly HttpClient _client;
+        private readonly AppSettings _appSettings;
 
-        public AzureOpenAIClient(HttpClient client)
+        public AzureOpenAIClient(HttpClient client,
+            AppSettings appSettings)
         {
             _client = client;
+            this._appSettings = appSettings;
         }
-        public async Task<PostChatMessageResult> PostAsync(PostChatMessageRequest request)
+        public async Task<PostChatMessageResponse> PostAsync(PostChatMessageRequest request)
         {
-            var uri = Environment.GetEnvironmentVariable("AZURE_OPEN_AI:RESOURCE_URI");
+            Uri azureOpenAIResourceUri = new(_appSettings.AzureOpenAIResourceUri);
 
-            if (uri == string.Empty || uri == null)
-                throw new ArgumentNullException(nameof(uri));
-
-            Uri azureOpenAIResourceUri = new(uri);
-            var apiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY");
-
-            if (apiKey == string.Empty || apiKey == null)
-                throw new ArgumentNullException(nameof(apiKey));
-
-            AzureKeyCredential azureOpenAIApiKey = new(apiKey);
+            AzureKeyCredential azureOpenAIApiKey = new(_appSettings.AzureOpenAiAPIKey);
 
             OpenAIClient client = new(azureOpenAIResourceUri, azureOpenAIApiKey);
 
@@ -40,12 +34,11 @@ namespace PromptGPT.Clients
                 DeploymentName = request.ModelDeployment.Name,
                 Messages =
                 {
-                    new ChatRequestSystemMessage(request.ChatPrompt.Prompt),
-                    new ChatRequestUserMessage(request.ChatMessages.Last<ChatMessageDto>().Message),
+                    new ChatRequestSystemMessage(request.ChatPrompt.Prompt)
                 }
             };
 
-            foreach(var message in request.ChatMessages)
+            foreach (var message in request.ChatMessages)
             {
                 if (message.ChatMessageRole == ChatMessageRole.User)
                     chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(message.Message));
@@ -53,11 +46,25 @@ namespace PromptGPT.Clients
                     chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(message.Message));
             }
 
-            Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
-            ChatResponseMessage responseMessage = response.Value.Choices[0].Message;
-            Console.WriteLine($"[{responseMessage.Role.ToString().ToUpperInvariant()}]: {responseMessage.Content}");
+            chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(request.CurrentChatMessage.Message));
 
-            return new PostChatMessageResult();
+            try
+            {
+                Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
+                ChatResponseMessage responseMessage = response.Value.Choices[0].Message;
+                Console.WriteLine($"[{responseMessage.Role.ToString().ToUpperInvariant()}]: {responseMessage.Content}");
+
+                return new PostChatMessageResponse()
+                {
+                    ChatMessageRole = responseMessage.Role.ToString(),
+                    Message = responseMessage.Content,
+                };
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
         }
     }
 }

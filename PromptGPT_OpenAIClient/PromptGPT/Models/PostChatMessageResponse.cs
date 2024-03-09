@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace PromptGPT.Models
 {
-    public class PostChatMessageResult
+    public class PostChatMessageResponse
     {
-        
+        public string Message { get; set; } = null!;
+        public string ChatMessageRole { get; set; } = null!;
     }
 }
