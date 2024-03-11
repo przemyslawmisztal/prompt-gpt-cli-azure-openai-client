@@ -9,11 +9,14 @@ namespace PromptGPT.Client
 {
     public class App
     {
-        private readonly AzureOpenAIService azureOpenAIService;
+        private readonly AzureOpenAIService _azureOpenAIService;
+        private readonly ChatPromptService _chatPromptService;
 
-        public App(AzureOpenAIService azureOpenAIService)
+        public App(AzureOpenAIService azureOpenAIService,
+            ChatPromptService chatPromptService)
         {
-            this.azureOpenAIService = azureOpenAIService;
+            this._azureOpenAIService = azureOpenAIService;
+            this._chatPromptService = chatPromptService;
         }
         public void Run(string[] args)
         {
@@ -33,12 +36,30 @@ namespace PromptGPT.Client
             {
                 RunChat();
             }
+            else if (menuChoice == "2") 
+            {
+                RunPrompts();
+            }
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Program ended.");
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.ReadKey();
+        }
+
+        private void RunPrompts()
+        {
+            var prompts = _chatPromptService.ReadPrompts();
+            Console.WriteLine("List of available prompts: ");
+
+            foreach (var prompt in prompts.ChatPrompts) 
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[{prompt.Name}] {prompt.Prompt}");
+            }
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         private void RunChat()
@@ -52,7 +73,7 @@ namespace PromptGPT.Client
 
                 if (!string.IsNullOrEmpty(question))
                 {
-                    var result = azureOpenAIService.PostMessageAsync(question).Result;
+                    var result = _azureOpenAIService.PostMessageAsync(question).Result;
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("");

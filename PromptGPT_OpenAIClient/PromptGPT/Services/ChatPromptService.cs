@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,9 +18,10 @@ namespace PromptGPT.Services
 
         public ChatPrompt GetCurrentPrompt()
         {
+            var prompts = ReadPrompts();
             return new ChatPrompt()
             {
-                Prompt = "You are an assistant to the Regional Manager"
+                Prompt = prompts.ChatPrompts.First().Prompt
             };
         }
 
@@ -35,7 +37,7 @@ namespace PromptGPT.Services
                     result.ChatPrompts.Add(
                         new ChatPromptDto()
                         {
-                            Name = promptName,
+                            Name = Path.GetFileName(promptName),
                             Prompt = ReadTextFileContent(promptName)
                         }
                     );
