@@ -24,6 +24,7 @@ namespace PromptGPT.Client
             string defaultModel = "model";
 
             Console.WriteLine($"1 - Start chat with the {defaultPrompt} and the {defaultModel} model.");
+            Console.WriteLine($"2 - Select different prompt.");
             Console.WriteLine($"Quit - Quit application.");
 
             var menuChoice = Console.ReadLine();

@@ -11,6 +11,7 @@ var config = builder.Build();
 
 var uri = config["AZURE_OPEN_AI:RESOURCE_URI"];
 var key = config["AZURE_OPENAI_API_KEY"];
+var localStoragePath = Directory.GetCurrentDirectory() + "/prompts";
 
 if (string.IsNullOrEmpty(uri))
     uri = args[0];
@@ -18,7 +19,7 @@ if (string.IsNullOrEmpty(uri))
 if (string.IsNullOrEmpty(key))
     key = args[1];
 
-using IHost host = CreateHostBuilder(args, uri, key).Build();
+using IHost host = CreateHostBuilder(args, uri, key, localStoragePath).Build();
 using var scope = host.Services.CreateScope();
 
 var services = scope.ServiceProvider;
@@ -34,13 +35,14 @@ catch (Exception e)
 
 
 
-static IHostBuilder CreateHostBuilder(string[] args, string uri, string key)
+static IHostBuilder CreateHostBuilder(string[] args, string uri, string key, string localStoragePath)
 {
     return Host.CreateDefaultBuilder(args)
         .ConfigureServices((_, services) =>
         {
             services.AddAppSettings(uri, key);
             services.AddPromptGPTServices();
+            services.AddServicesWithLocalStorage(localStoragePath);
             services.AddSingleton<App>();
         });
 }

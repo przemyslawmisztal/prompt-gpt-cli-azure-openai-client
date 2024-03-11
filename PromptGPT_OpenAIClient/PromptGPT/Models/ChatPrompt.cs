@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PromptGPT.Models
+﻿namespace PromptGPT.Models
 {
     public class ChatPrompt
     {
+        public string Name { get; set; } = null!;
         public string Prompt { get; set; } = null!;
     }
 }

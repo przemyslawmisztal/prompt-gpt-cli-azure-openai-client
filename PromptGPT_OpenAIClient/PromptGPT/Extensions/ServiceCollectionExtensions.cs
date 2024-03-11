@@ -21,5 +21,12 @@ namespace PromptGPT.Extensions
 
             services.AddSingleton(appSettings);
         }
+
+        public static void AddServicesWithLocalStorage(this IServiceCollection services, string localStoragePath)
+        {
+            var charPromptService = new ChatPromptService(localStoragePath);
+
+            services.AddSingleton(charPromptService);
+        }
     }
 }
