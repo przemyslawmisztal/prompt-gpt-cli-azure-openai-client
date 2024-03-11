@@ -37,7 +37,7 @@ namespace PromptGPT.Services
             };
         }
 
-        public string SendMessage(string message)
+        public async Task<PostChatMessageResponse> PostMessageAsync(string message)
         {
             if (message.Length == 0)
                 throw new ArgumentException(message, nameof(message));
@@ -61,9 +61,11 @@ namespace PromptGPT.Services
             _chat.ChatMessages.Add(new ChatMessage(message, ChatMessageRole.User));
             request.CurrentChatMessage = new ChatMessageDto() { Message = message, ChatMessageRole = ChatMessageRole.User };
 
-            var response = _client.PostAsync(request);
+            var response = await _client.PostAsync(request);
 
-            return response.Result.Message;
+            _chat.ChatMessages.Add(new ChatMessage(response.Message, ChatMessageRole.Assistant));
+
+            return response;
         }
     }
 }

@@ -21,6 +21,18 @@ namespace PromptGPT.Clients
             _client = client;
             this._appSettings = appSettings;
         }
+
+        public GetModelDeploymentResponse GetModelDeployments()
+        {
+            Uri azureOpenAIResourceUri = new(_appSettings.AzureOpenAIResourceUri);
+
+            AzureKeyCredential azureOpenAIApiKey = new(_appSettings.AzureOpenAiAPIKey);
+
+            OpenAIClient client = new(azureOpenAIResourceUri, azureOpenAIApiKey);
+
+            return null;
+        }
+
         public async Task<PostChatMessageResponse> PostAsync(PostChatMessageRequest request)
         {
             Uri azureOpenAIResourceUri = new(_appSettings.AzureOpenAIResourceUri);
@@ -52,8 +64,7 @@ namespace PromptGPT.Clients
             {
                 Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
                 ChatResponseMessage responseMessage = response.Value.Choices[0].Message;
-                Console.WriteLine($"[{responseMessage.Role.ToString().ToUpperInvariant()}]: {responseMessage.Content}");
-
+                
                 return new PostChatMessageResponse()
                 {
                     ChatMessageRole = responseMessage.Role.ToString(),

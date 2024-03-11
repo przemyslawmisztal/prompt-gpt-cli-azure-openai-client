@@ -24,19 +24,43 @@ namespace PromptGPT.Client
             string defaultModel = "model";
 
             Console.WriteLine($"1 - Start chat with the {defaultPrompt} and the {defaultModel} model.");
-            Console.WriteLine("Write your question: ");
-            var question = Console.ReadLine();
+            Console.WriteLine($"Quit - Quit application.");
 
-            if (!string.IsNullOrEmpty(question))
-            {
-                var result = azureOpenAIService.SendMessage(question);
+            var menuChoice = Console.ReadLine();
 
-                Console.WriteLine(result);
-            }
-            else 
+            if (menuChoice == "1")
             {
-                Console.WriteLine("No question asked");
+                string? question;
+                Console.WriteLine("Write your question (Quit to quit): ");
+
+                Console.ForegroundColor = ConsoleColor.Blue;
+                while ((question = Console.ReadLine()) != "Quit")
+                {
+
+                    if (!string.IsNullOrEmpty(question))
+                    {
+                        var result = azureOpenAIService.PostMessageAsync(question);
+
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("");
+                        Console.WriteLine($"[{result.Result.ChatMessageRole.ToUpperInvariant()}]: {result.Result.Message}");
+                        Console.WriteLine("");
+
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.WriteLine("USER - type a followup question or Quit to quit");
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine("No question asked");
+                    }
+                }
             }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Program ended.");
+
+            Console.ForegroundColor = ConsoleColor.White;
             Console.ReadKey();
         }
     }
