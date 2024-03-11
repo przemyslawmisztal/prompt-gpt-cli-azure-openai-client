@@ -10,5 +10,9 @@ namespace PromptGPT.Models
     {
         public string Message { get; set; } = null!;
         public string ChatMessageRole { get; set; } = null!;
+        public int PromptTokens { get; set; }
+        public int TotalTokens { get; set; }
+        public int CompletionTokens { get; set; }
+
     }
 }

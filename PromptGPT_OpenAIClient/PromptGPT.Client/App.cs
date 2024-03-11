@@ -30,31 +30,7 @@ namespace PromptGPT.Client
 
             if (menuChoice == "1")
             {
-                string? question;
-                Console.WriteLine("Write your question (Quit to quit): ");
-
-                Console.ForegroundColor = ConsoleColor.Blue;
-                while ((question = Console.ReadLine()) != "Quit")
-                {
-
-                    if (!string.IsNullOrEmpty(question))
-                    {
-                        var result = azureOpenAIService.PostMessageAsync(question);
-
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("");
-                        Console.WriteLine($"[{result.Result.ChatMessageRole.ToUpperInvariant()}]: {result.Result.Message}");
-                        Console.WriteLine("");
-
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.WriteLine("USER - type a followup question or Quit to quit");
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine("No question asked");
-                    }
-                }
+                RunChat();
             }
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -62,6 +38,38 @@ namespace PromptGPT.Client
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.ReadKey();
+        }
+
+        private void RunChat()
+        {
+            string? question;
+            Console.WriteLine("Write your question (Quit to quit): ");
+
+            Console.ForegroundColor = ConsoleColor.Blue;
+            while ((question = Console.ReadLine()) != "Quit")
+            {
+
+                if (!string.IsNullOrEmpty(question))
+                {
+                    var result = azureOpenAIService.PostMessageAsync(question).Result;
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("");
+                    Console.WriteLine($"[{result.ChatMessageRole.ToUpperInvariant()}]: {result.Message}");
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine($"This answer did cost you {result.TotalTokens} tokens. Prompt tokens: {result.PromptTokens}. Completion tokens: {result.CompletionTokens}");
+                    Console.WriteLine("");
+
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("USER - type a followup question or Quit to quit");
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine("No question asked");
+                }
+            }
         }
     }
 }

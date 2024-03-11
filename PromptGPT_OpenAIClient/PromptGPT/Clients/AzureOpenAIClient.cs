@@ -65,11 +65,17 @@ namespace PromptGPT.Clients
                 Response<ChatCompletions> response = await client.GetChatCompletionsAsync(chatCompletionsOptions);
                 ChatResponseMessage responseMessage = response.Value.Choices[0].Message;
                 
-                return new PostChatMessageResponse()
+                var postChatMessageResponse = new PostChatMessageResponse()
                 {
                     ChatMessageRole = responseMessage.Role.ToString(),
                     Message = responseMessage.Content,
                 };
+
+                postChatMessageResponse.PromptTokens = response.Value.Usage.PromptTokens;
+                postChatMessageResponse.CompletionTokens = response.Value.Usage.CompletionTokens;
+                postChatMessageResponse.TotalTokens = response.Value.Usage.TotalTokens;
+
+                return postChatMessageResponse;
             }
             catch (Exception ex) 
             {
