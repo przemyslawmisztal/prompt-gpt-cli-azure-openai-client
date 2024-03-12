@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace PromptGPT.Models
 {
-    internal class ChatSettings
+    public class ChatSettings
     {
-        //temperature and stuff
+        public float? Temperature { get; set; }
     }
 }

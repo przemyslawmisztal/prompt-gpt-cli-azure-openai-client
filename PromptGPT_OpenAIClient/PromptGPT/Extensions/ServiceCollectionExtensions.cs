@@ -9,9 +9,10 @@ namespace PromptGPT.Extensions
         public static void AddPromptGPTServices(this IServiceCollection services)
         {
             services.AddSingleton<HttpClient>();
-            services.AddSingleton<AzureOpenAIService>();
+            services.AddSingleton<ChatService>();
             services.AddSingleton<ChatPromptService>();
             services.AddSingleton<ModelDeploymentService>();
+            services.AddSingleton<ChatSettingsService>();
             services.AddSingleton<AzureOpenAIClient>();
         }
 
@@ -24,9 +25,9 @@ namespace PromptGPT.Extensions
 
         public static void AddServicesWithLocalStorage(this IServiceCollection services, string localStoragePath)
         {
-            var charPromptService = new ChatPromptService(localStoragePath);
+            var promptGptRepository = new PromptGptRepository(localStoragePath);
 
-            services.AddSingleton(charPromptService);
+            services.AddSingleton(promptGptRepository);
         }
     }
 }

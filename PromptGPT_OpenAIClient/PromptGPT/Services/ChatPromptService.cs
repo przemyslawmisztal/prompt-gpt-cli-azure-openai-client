@@ -4,68 +4,70 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PromptGPT.Clients;
 using PromptGPT.Models;
 
 namespace PromptGPT.Services
 {
     public class ChatPromptService
     { 
-        private readonly string localStoragePath;
-        public ChatPromptService(string localStoragePath)
+        private readonly PromptGptRepository _promptGptRepository;
+
+        public ChatPromptService(PromptGptRepository promptGptRepository)
         {
-            this.localStoragePath = localStoragePath;
+            this._promptGptRepository = promptGptRepository;
         }
 
         public ChatPrompt GetCurrentPrompt()
         {
             var prompts = ReadPrompts();
+
+            var defaultPrompt = prompts.ChatPrompts.Where(p => p.Default).First();
+
             return new ChatPrompt()
             {
-                Prompt = prompts.ChatPrompts.First().Prompt
+                Prompt = defaultPrompt.Prompt,
+                Default = defaultPrompt.Default,
+                Name = defaultPrompt.Name
             };
+        }
+
+        public void ChangeDefaultPrompt(string name)
+        {
+            var prompts = ReadPrompts();
+
+            var chatPrompts = new List<ChatPrompt>();
+
+            foreach (var prompt in prompts.ChatPrompts)
+            {
+                chatPrompts.Add(new ChatPrompt()
+                {
+                    Default = prompt.Name == name,
+                    Name = prompt.Name,
+                    Prompt = prompt.Prompt
+                });
+            }
+
+            _promptGptRepository.SavePrompts(chatPrompts);
         }
 
         public GetChatPromptsRequest ReadPrompts()
         {
-            var promptNames = Directory.GetFiles(localStoragePath);
+            var listOfPrompts = _promptGptRepository.ReadPrompts();
+
             var result = new GetChatPromptsRequest();
 
-            foreach (var promptName in promptNames)
+            foreach (var prompt in listOfPrompts)
             {
-                if (IsTextFile(promptName))
+                result.ChatPrompts.Add(new ChatPromptDto()
                 {
-                    result.ChatPrompts.Add(
-                        new ChatPromptDto()
-                        {
-                            Name = Path.GetFileName(promptName),
-                            Prompt = ReadTextFileContent(promptName)
-                        }
-                    );
-                }
-                
+                    Name = prompt.Name,
+                    Prompt = prompt.Prompt,
+                    Default = prompt.Default
+                });
             }
 
             return result;
-        }
-
-        public static bool IsTextFile(string filePath)
-        {
-            string extension = Path.GetExtension(filePath);
-            return !string.IsNullOrEmpty(extension) && extension.Equals(".txt", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public static string ReadTextFileContent(string filePath)
-        {
-            try
-            {
-                string content = File.ReadAllText(filePath);
-                return content;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error reading {Path.GetFileName(filePath)}: {ex.Message}");
-                return string.Empty;
-            }
         }
     }
 }

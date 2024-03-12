@@ -8,23 +8,29 @@ using PromptGPT.Models;
 
 namespace PromptGPT.Services
 {
-    public class AzureOpenAIService
+    public class ChatService
     {
         private readonly AzureOpenAIClient _client;
         private readonly ChatPromptService _chatPromptService;
         private readonly ModelDeploymentService _modelDeploymentService;
+        private readonly ChatSettingsService _chatSettingsService;
         private readonly AppSettings _appSettings;
+        private readonly PromptGptRepository _promptGptRepository;
         private Chat _chat = null!;
 
-        public AzureOpenAIService(AzureOpenAIClient client,
+        public ChatService(AzureOpenAIClient client,
             ChatPromptService chatPromptService,
             ModelDeploymentService modelDeploymentService,
-            AppSettings appSettings)
+            ChatSettingsService chatSettingsService,
+            AppSettings appSettings,
+            PromptGptRepository promptGptRepository)
         {
             this._client = client;
             this._chatPromptService = chatPromptService;
             this._modelDeploymentService = modelDeploymentService;
+            this._chatSettingsService = chatSettingsService;
             this._appSettings = appSettings;
+            this._promptGptRepository = promptGptRepository;
         }
 
         public void StartNewChat()
@@ -33,7 +39,8 @@ namespace PromptGPT.Services
             {
                 DateStarted = DateTime.Now,
                 ChatPrompt = _chatPromptService.GetCurrentPrompt(),
-                ModelDeployment = _modelDeploymentService.GetDefaultModelDeployment()
+                ModelDeployment = _modelDeploymentService.GetDefaultModelDeployment(),
+                Id = Guid.NewGuid()
             };
         }
 
@@ -48,15 +55,18 @@ namespace PromptGPT.Services
             var request = new PostChatMessageRequest
             {
                 ChatPrompt = _chat.ChatPrompt,
-                ModelDeployment = _chat.ModelDeployment
+                ModelDeployment = _chat.ModelDeployment,
+                Temperature = _chatSettingsService.GetChatSettings().Temperature
             };
 
             foreach (var chatMessage in _chat.ChatMessages.OrderBy(p => p.DatePosted))
+            {
                 request.ChatMessages.Add(new ChatMessageDto()
                 {
                     ChatMessageRole = chatMessage.ChatMessageRole,
                     Message = chatMessage.Message
                 });
+            }
 
             _chat.ChatMessages.Add(new ChatMessage(message, ChatMessageRole.User));
             request.CurrentChatMessage = new ChatMessageDto() { Message = message, ChatMessageRole = ChatMessageRole.User };
@@ -64,6 +74,7 @@ namespace PromptGPT.Services
             var response = await _client.PostAsync(request);
 
             _chat.ChatMessages.Add(new ChatMessage(response.Message, ChatMessageRole.Assistant));
+            _promptGptRepository.SaveChat(_chat);
 
             return response;
         }

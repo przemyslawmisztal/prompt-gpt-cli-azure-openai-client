@@ -11,7 +11,7 @@ var config = builder.Build();
 
 var uri = config["AZURE_OPEN_AI:RESOURCE_URI"];
 var key = config["AZURE_OPENAI_API_KEY"];
-var localStoragePath = Directory.GetCurrentDirectory() + "/prompts";
+var localStoragePath = Directory.GetCurrentDirectory();
 
 if (string.IsNullOrEmpty(uri))
     uri = args[0];

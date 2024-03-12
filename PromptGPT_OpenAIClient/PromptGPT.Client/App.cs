@@ -1,4 +1,5 @@
-﻿using PromptGPT.Services;
+﻿using PromptGPT.Helpers;
+using PromptGPT.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace PromptGPT.Client
 {
     public class App
     {
-        private readonly AzureOpenAIService _azureOpenAIService;
+        private readonly ChatService _azureOpenAIService;
         private readonly ChatPromptService _chatPromptService;
 
-        public App(AzureOpenAIService azureOpenAIService,
+        public App(ChatService azureOpenAIService,
             ChatPromptService chatPromptService)
         {
             this._azureOpenAIService = azureOpenAIService;
@@ -51,14 +52,45 @@ namespace PromptGPT.Client
         private void RunPrompts()
         {
             var prompts = _chatPromptService.ReadPrompts();
+            var chatPrompts = prompts.ChatPrompts.OrderByDescending(p => p.Default).ThenBy(p => p.Name).ToList();
             Console.WriteLine("List of available prompts: ");
+            var index = 0;
 
-            foreach (var prompt in prompts.ChatPrompts) 
+            foreach (var prompt in chatPrompts) 
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"[{prompt.Name}] {prompt.Prompt}");
+                if (!prompt.Default)
+                {
+                    Console.WriteLine($"{index} - [{prompt.Name}] {prompt.Prompt}");
+                }
+                else
+                {
+                    Console.WriteLine($"D - [{prompt.Name}] {prompt.Prompt}");
+                }
+
+                index++;
             }
 
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Pick a number to change default. Pick 0 to abort.");
+            string? number = Console.ReadLine();
+
+            if (number != null && IntegerHelpers.IsPositiveIntegerGreaterThanZero(number))
+            {
+                int selection = int.Parse(number);
+
+                string name = chatPrompts[selection].Name;
+
+                _chatPromptService.ChangeDefaultPrompt(name);
+                Console.WriteLine($"Default changed to [{chatPrompts[selection].Name}] {chatPrompts[selection].Prompt}");
+                RunPrompts();
+            }
+            else
+            {
+                Console.WriteLine("Picked 0 or invalid. Aborted.");
+                Console.WriteLine();
+                Run([]);
+            }
             Console.ForegroundColor = ConsoleColor.White;
         }
 

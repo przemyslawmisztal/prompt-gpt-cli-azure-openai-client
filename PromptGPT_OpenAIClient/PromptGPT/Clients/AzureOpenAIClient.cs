@@ -47,7 +47,8 @@ namespace PromptGPT.Clients
                 Messages =
                 {
                     new ChatRequestSystemMessage(request.ChatPrompt.Prompt)
-                }
+                },
+                Temperature = request.Temperature
             };
 
             foreach (var message in request.ChatMessages)

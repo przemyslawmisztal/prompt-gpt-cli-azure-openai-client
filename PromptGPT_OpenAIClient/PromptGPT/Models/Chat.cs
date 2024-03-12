@@ -12,5 +12,6 @@ namespace PromptGPT.Models
         public List<ChatMessage> ChatMessages { get; set; } = [];
         public ModelDeployment ModelDeployment { get; set; } = null!;
         public DateTime DateStarted { get; set; }
+        public Guid Id { get; set; } 
     }
 }

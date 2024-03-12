@@ -12,6 +12,7 @@ namespace PromptGPT.Models
         public List<ChatMessageDto> ChatMessages { get; set; } = [];
         public ModelDeployment ModelDeployment { get; set; } = null!;
         public ChatMessageDto CurrentChatMessage { get; set; } = null!;
+        public float? Temperature { get; set; }
     }
 
     public class ChatMessageDto
