@@ -105,7 +105,11 @@ namespace PromptGPT.Client
 
                 if (!string.IsNullOrEmpty(question))
                 {
+                    var busy = new ConsoleBusyIndicator();
+
+                    busy.Start();
                     var result = _azureOpenAIService.PostMessageAsync(question).Result;
+                    busy.Stop();
 
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("");
